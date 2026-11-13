@@ -162,7 +162,7 @@ dialog .actions{margin:0;padding:12px 18px;border-top:1px solid var(--line);back
 .csvBtns .btn{padding:8px 11px}
 .btn.alt{background:none;color:var(--ink);border:2px solid var(--line)}
 .btn.alt.arm{background:var(--danger);border-color:var(--danger);color:#fff}
-.reset{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.reset{border-top:1px solid var(--line);margin-top:0;padding-top:12px}
 .reset small{display:block;color:var(--soft);font-size:.8rem;margin-top:6px}
 .btn.danger{background:none;color:var(--danger);border:2px solid var(--danger)}
 .btn.danger.arm{background:var(--danger);color:var(--onDanger)}
@@ -249,7 +249,7 @@ html.scroll-locked{overflow:hidden;overscroll-behavior:none}
     </div>
   </details>
   <details class="sect" id="dataSect">
-    <summary>Data <small>CSV, empty jar</small></summary>
+    <summary>Data <small>CSV import, export</small></summary>
     <div class="sBody">
   <div class="csv" id="csvBox">
     <div class="csvTop">
@@ -273,12 +273,12 @@ html.scroll-locked{overflow:hidden;overscroll-behavior:none}
       </div>
     </div>
   </div>
+    </div>
+  </details>
   <div class="reset">
     <button class="btn danger" id="resetJar">Empty the jar</button>
     <small id="resetHint">Deletes all coins. Amounts and goal stay.</small>
   </div>
-    </div>
-  </details>
   </div>
   <div class="actions">
     <button class="btn ghost" id="cancelSettings">Cancel</button>
