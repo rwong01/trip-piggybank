@@ -12,20 +12,63 @@
 <meta name="apple-mobile-web-app-title" content="Piggybank">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#EAF3F1">
+<script>/* Apply the saved skin before first paint to avoid a flash */
+try { var s = JSON.parse(localStorage.getItem("tp_skin")); if (["sunset","forest","dusk"].indexOf(s) > -1) document.documentElement.setAttribute("data-skin", s); } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#EAF3F1; --ink:#12343B; --soft:#4F6F74; --card:#FFFFFF; --line:#C9DDD9;
-  --coin:#F2B632; --coinDeep:#C98A06; --sea:#1F7A7A; --danger:#B8483A;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+/* Skins: Lagoon is the default. Each skin has light and dark values. A .sw chip
+   with data-skin gets that skin's colors so the theme picker can preview it. */
+:root,.sw[data-skin="lagoon"]{
+  --bg:#EAF3F1; --ink:#12343B; --soft:#4F6F74; --card:#FFFFFF; --line:#C9DDD9;
+  --coin:#F2B632; --coinDeep:#C98A06; --sea:#1F7A7A; --danger:#B8483A;
+  --coinInk:#3A2800; --onDanger:#FFFFFF; --scrim:rgba(18,52,59,.55); --pop1:#E85D75; --pop2:#5BB5F0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]),:root:not([data-theme="light"]) .sw[data-skin="lagoon"]{
   --bg:#0F2226; --ink:#E6F2EF; --soft:#9DB9B8; --card:#17313A; --line:#264950;
-  --coin:#F2B632; --coinDeep:#E0A020; --sea:#4FB3AE; --danger:#E0786A;}}
-:root[data-theme="dark"]{--bg:#0F2226;--ink:#E6F2EF;--soft:#9DB9B8;--card:#17313A;--line:#264950;--coin:#F2B632;--coinDeep:#E0A020;--sea:#4FB3AE;--danger:#E0786A;}
+  --coin:#F2B632; --coinDeep:#E0A020; --sea:#4FB3AE; --danger:#E0786A;
+  --coinInk:#3A2800; --onDanger:#1F0A07; --scrim:rgba(4,14,16,.7); --pop1:#F28BA0; --pop2:#7CC8F5;}}
+:root[data-theme="dark"],:root[data-theme="dark"] .sw[data-skin="lagoon"]{--bg:#0F2226;--ink:#E6F2EF;--soft:#9DB9B8;--card:#17313A;--line:#264950;--coin:#F2B632;--coinDeep:#E0A020;--sea:#4FB3AE;--danger:#E0786A;--coinInk:#3A2800;--onDanger:#1F0A07;--scrim:rgba(4,14,16,.7);--pop1:#F28BA0;--pop2:#7CC8F5;}
+/* Sunset: warm peach and coral */
+:root[data-skin="sunset"],.sw[data-skin="sunset"]{
+  --bg:#FCEEE7; --ink:#3B1C1A; --soft:#7A4A42; --card:#FFFFFF; --line:#F1D2C5;
+  --coin:#FFAD4D; --coinDeep:#D9782B; --sea:#C2416B; --danger:#B42318;
+  --coinInk:#3D1F00; --onDanger:#FFFFFF; --scrim:rgba(59,28,26,.55); --pop1:#FF6F61; --pop2:#FFD27A;
+}
+@media (prefers-color-scheme:dark){:root[data-skin="sunset"]:not([data-theme="light"]),:root:not([data-theme="light"]) .sw[data-skin="sunset"]{
+  --bg:#26141A; --ink:#FCEAE3; --soft:#D7A99E; --card:#341D24; --line:#53313A;
+  --coin:#FFAD4D; --coinDeep:#E08A3A; --sea:#FF8FA8; --danger:#FF8A7A;
+  --coinInk:#3D1F00; --onDanger:#2A0E0A; --scrim:rgba(16,6,9,.7); --pop1:#FF7F70; --pop2:#FFD27A;}}
+:root[data-skin="sunset"][data-theme="dark"],:root[data-theme="dark"] .sw[data-skin="sunset"]{--bg:#26141A;--ink:#FCEAE3;--soft:#D7A99E;--card:#341D24;--line:#53313A;--coin:#FFAD4D;--coinDeep:#E08A3A;--sea:#FF8FA8;--danger:#FF8A7A;--coinInk:#3D1F00;--onDanger:#2A0E0A;--scrim:rgba(16,6,9,.7);--pop1:#FF7F70;--pop2:#FFD27A;}
+/* Forest: sage and honey */
+:root[data-skin="forest"],.sw[data-skin="forest"]{
+  --bg:#EEF2E8; --ink:#1D3324; --soft:#4C6350; --card:#FFFFFF; --line:#D2DCC8;
+  --coin:#E9BC4C; --coinDeep:#B88A1E; --sea:#3B7A4B; --danger:#B3412F;
+  --coinInk:#352500; --onDanger:#FFFFFF; --scrim:rgba(29,51,36,.55); --pop1:#E07A5F; --pop2:#9CCB86;
+}
+@media (prefers-color-scheme:dark){:root[data-skin="forest"]:not([data-theme="light"]),:root:not([data-theme="light"]) .sw[data-skin="forest"]{
+  --bg:#121C15; --ink:#E7F0E4; --soft:#A5BBA6; --card:#1B2A1F; --line:#2E4434;
+  --coin:#E9BC4C; --coinDeep:#C99A2E; --sea:#7CC48E; --danger:#EE8A76;
+  --coinInk:#352500; --onDanger:#2A0E0A; --scrim:rgba(6,11,8,.7); --pop1:#F09A80; --pop2:#A8D894;}}
+:root[data-skin="forest"][data-theme="dark"],:root[data-theme="dark"] .sw[data-skin="forest"]{--bg:#121C15;--ink:#E7F0E4;--soft:#A5BBA6;--card:#1B2A1F;--line:#2E4434;--coin:#E9BC4C;--coinDeep:#C99A2E;--sea:#7CC48E;--danger:#EE8A76;--coinInk:#352500;--onDanger:#2A0E0A;--scrim:rgba(6,11,8,.7);--pop1:#F09A80;--pop2:#A8D894;}
+/* Dusk: lavender and violet */
+:root[data-skin="dusk"],.sw[data-skin="dusk"]{
+  --bg:#F2EEF9; --ink:#28203F; --soft:#5D5479; --card:#FFFFFF; --line:#DAD3EC;
+  --coin:#FFC24D; --coinDeep:#D9951E; --sea:#6B47C7; --danger:#B4304F;
+  --coinInk:#3A2600; --onDanger:#FFFFFF; --scrim:rgba(40,32,63,.55); --pop1:#F27BB0; --pop2:#7FD3E8;
+}
+@media (prefers-color-scheme:dark){:root[data-skin="dusk"]:not([data-theme="light"]),:root:not([data-theme="light"]) .sw[data-skin="dusk"]{
+  --bg:#16122A; --ink:#EDE9FA; --soft:#B3AACF; --card:#211B3B; --line:#352D57;
+  --coin:#FFC24D; --coinDeep:#E0A436; --sea:#A98BFA; --danger:#F58AA0;
+  --coinInk:#3A2600; --onDanger:#2A0E14; --scrim:rgba(8,6,18,.7); --pop1:#F58FC0; --pop2:#8CDCEF;}}
+:root[data-skin="dusk"][data-theme="dark"],:root[data-theme="dark"] .sw[data-skin="dusk"]{--bg:#16122A;--ink:#EDE9FA;--soft:#B3AACF;--card:#211B3B;--line:#352D57;--coin:#FFC24D;--coinDeep:#E0A436;--sea:#A98BFA;--danger:#F58AA0;--coinInk:#3A2600;--onDanger:#2A0E14;--scrim:rgba(8,6,18,.7);--pop1:#F58FC0;--pop2:#8CDCEF;}
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,-apple-system,sans-serif;line-height:1.45}
 main{max-width:460px;margin:0 auto;padding:20px 18px 40px}
@@ -45,11 +88,11 @@ h1{font-size:1.35rem;font-weight:800;margin:0}
 input{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
 input:focus-visible,button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:3px;margin-bottom:10px}
-.seg.three{grid-template-columns:1fr 1fr 1fr}
-.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--soft);padding:9px;border-radius:9px;cursor:pointer}
+.seg.three{grid-template-columns:repeat(3,minmax(0,auto))}
+.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--soft);padding:9px 4px;border-radius:9px;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .drops{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:18px 10px;background:var(--coin);color:#3A2800;box-shadow:0 5px 0 var(--coinDeep);text-align:center;transition:transform .08s}
+.drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:18px 10px;background:var(--coin);color:var(--coinInk);box-shadow:0 5px 0 var(--coinDeep);text-align:center;transition:transform .08s}
 .drop:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coinDeep)}
 .drop b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.6rem;font-weight:800}
 .drop span{font-size:.88rem;font-weight:600}
@@ -65,12 +108,12 @@ li .meta{color:var(--soft);font-size:.8rem}
 li .amt{font-weight:600;white-space:nowrap}
 .x{background:none;border:0;color:var(--soft);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:6px;margin-left:4px;border-radius:8px;display:inline-flex;align-items:center;min-width:32px;min-height:32px;justify-content:center}
 .x svg{width:18px;height:18px}
-.x.arm{color:#fff;background:var(--danger);padding:6px 10px}
+.x.arm{color:var(--onDanger);background:var(--danger);padding:6px 10px}
 .empty{color:var(--soft);font-size:.9rem;padding:8px 0}
 .note{font-size:.82rem;color:var(--soft);background:var(--card);border:2px dashed var(--line);border-radius:10px;padding:8px 10px;margin:12px 0}
-dialog{border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,380px)}
+dialog{border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,380px);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain}
 dialog::backdrop{background:rgba(0,0,0,.4)}
-.row{margin-bottom:10px}.row label{display:block;font-size:.85rem;color:var(--soft);margin-bottom:3px}
+.row{margin-bottom:10px}.row.pair{display:flex;gap:10px}.row.pair>div{flex:1;min-width:0}.row label{display:block;font-size:.85rem;color:var(--soft);margin-bottom:3px}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:var(--ink);color:var(--bg)}
 .toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 8px;font-weight:600}
@@ -84,17 +127,33 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .pinGate input{text-align:center;font-size:1.6rem;letter-spacing:.4em;margin-bottom:12px}
 .pinGate .err{color:var(--danger);font-size:.9rem;min-height:1.2em;margin-bottom:8px}
 .pinGate .btn{width:100%;padding:12px}
+.csv{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.csvTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.csvTop .gear{padding:6px 0}
+.csvZone{border:2px dashed var(--line);border-radius:12px;padding:12px 10px;text-align:center;color:var(--soft);font-size:.88rem;cursor:pointer;background:var(--card)}
+.csvZone b{display:block;color:var(--ink);font-weight:600}
+.csvZone small{display:block;margin-top:4px;font-size:.8rem}
+.csvZone:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.csvZone.over{border-color:var(--sea);color:var(--ink);background:var(--bg)}
+.csvPrev{border:2px solid var(--line);border-radius:12px;padding:10px;font-size:.88rem}
+.csvPrev p{margin:0 0 4px;font-weight:600}
+.csvPrev small{display:block;color:var(--soft);font-size:.8rem;overflow-wrap:anywhere}
+.csvPrev small[hidden]{display:none}
+.csvBtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.csvBtns .btn{padding:8px 11px}
+.btn.alt{background:none;color:var(--ink);border:2px solid var(--line)}
+.btn.alt.arm{background:var(--danger);border-color:var(--danger);color:#fff}
 .reset{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
 .reset small{display:block;color:var(--soft);font-size:.8rem;margin-top:6px}
 .btn.danger{background:none;color:var(--danger);border:2px solid var(--danger)}
-.btn.danger.arm{background:var(--danger);color:#fff}
+.btn.danger.arm{background:var(--danger);color:var(--onDanger)}
 .btn:disabled{opacity:.5}
 .btn.ghost{background:none;color:var(--soft)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.fill{transition:none}}
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
-.tada{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(18,52,59,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+.tada{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .3s}
 .tada.on{opacity:1;pointer-events:auto}
 .tada .card{background:var(--card);color:var(--ink);border-radius:24px;padding:28px 26px;text-align:center;max-width:320px;margin:0 20px;transform:scale(.6);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
 .tada.on .card{transform:scale(1)}
@@ -104,6 +163,14 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .jar.full{animation:wobble .9s ease 2}
 @keyframes wobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg) scale(1.05)}40%{transform:rotate(5deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(2deg)}}
 @media (prefers-reduced-motion:reduce){.jar.full{animation:none}.tada .card{transition:none}}
+.skins{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.skin{--ring:var(--ink);--ringGap:var(--card);font:inherit;font-size:.78rem;font-weight:600;color:var(--soft);background:none;border:0;padding:2px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.sw{position:relative;display:block;width:100%;height:36px;border-radius:10px;background:var(--bg);border:2px solid var(--line);overflow:hidden}
+.sw::before{content:"";position:absolute;left:9px;top:50%;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--coin);box-shadow:0 2px 0 var(--coinDeep)}
+.sw::after{content:"";position:absolute;right:8px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:4px;background:var(--ink)}
+.skin[aria-checked="true"]{color:var(--ink)}
+.skin[aria-checked="true"] .sw{box-shadow:0 0 0 2px var(--ringGap),0 0 0 4px var(--ring)}
+html.scroll-locked{overflow:hidden;overscroll-behavior:none}
 
 </style>
 </head>
@@ -141,11 +208,38 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 
 <dialog id="settings">
   <div class="row"><label for="sName">Trip name</label><input id="sName" maxlength="40"></div>
+  <div class="row pair">
+    <div><label for="sP1">Person 1</label><input id="sP1" maxlength="6" autocomplete="off"></div>
+    <div><label for="sP2">Person 2</label><input id="sP2" maxlength="6" autocomplete="off"></div>
+  </div>
   <div class="row"><label for="sGoal">Goal ($)</label><input id="sGoal" type="number" min="1" inputmode="decimal"></div>
   <div class="row"><label for="sLunch">Lunch, per person ($)</label><input id="sLunch" type="number" min="0" inputmode="decimal"></div>
   <div class="row"><label for="sDinner">Dinner, per person ($)</label><input id="sDinner" type="number" min="0" inputmode="decimal"></div>
+  <div class="row"><label id="skinLabel">Theme</label><div class="skins" id="skinPicker" role="radiogroup" aria-labelledby="skinLabel"></div></div>
   <label class="toggle" id="pinRow"><span>Require a PIN</span><input type="checkbox" id="sPinOn"></label>
   <div class="row" id="pinField" hidden><label for="sPin" id="sPinLabel">PIN (4 to 8 digits)</label><input id="sPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"></div>
+  <div class="csv" id="csvBox">
+    <div class="csvTop">
+      <button class="btn alt" id="csvExport" type="button">Export CSV</button>
+      <button class="gear" id="csvTemplate" type="button">Download template</button>
+    </div>
+    <div id="csvImport">
+      <div class="csvZone" id="csvZone" role="button" tabindex="0" aria-describedby="csvFmt">
+        <b>Import CSV</b>Drop a file here or tap to choose
+        <small id="csvFmt">Columns: date, person (1, 2 or both), meal, amount</small>
+      </div>
+      <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+      <div class="csvPrev" id="csvPrev" hidden aria-live="polite">
+        <p id="csvSum"></p>
+        <small id="csvSkip"></small>
+        <div class="csvBtns">
+          <button class="btn" id="csvAdd" type="button">Add to jar</button>
+          <button class="btn alt" id="csvReplace" type="button">Replace jar</button>
+          <button class="btn ghost" id="csvCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="reset">
     <button class="btn danger" id="resetJar">Empty the jar</button>
     <small id="resetHint">Deletes all coins. Amounts and goal stay.</small>
@@ -178,8 +272,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== Customize these for your own copy =====
-const PEOPLE = ["J", "R"];          // two short names or initials
+// The two people's names are set in Settings (entries store ids "p1"/"p2").
 const API_URL = "/api/jar";         // Netlify Function endpoint (leave as is)
 
 let pinWaiter = null;
@@ -225,14 +318,18 @@ function makeDb(){
       onSnapshot: (cb, eb) => entL.push([cb, eb])
     }),
     doc: () => ({ set: settings => post({ op: "settings", settings }), onSnapshot: cb => setL.push(cb) }),
+    importEntries: (entries, replace) => post({ op: "import", entries, replace: !!replace }),
     start(){ pull(); setInterval(pull, 10000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); }); }
   };
 }
 
-const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false };
+const DEFAULT_PEOPLE = ["J", "R"];
+const NAME_MAX = 6;
+const IDS = ["p1", "p2"];
+const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false, people: DEFAULT_PEOPLE };
 let settings = { ...DEFAULTS };
 let entries = [];
-let who = lsGet("tp_who", "Both");
+let who = "Both";
 const both = () => who === "Both";
 let db = null, readOnly = false, showAll = false, ready = false, gotSettings = false, gotEntries = false;
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -245,11 +342,28 @@ function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch 
 
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800); }
 
-const BOTH_LABEL = PEOPLE.join(" & ");
-[...PEOPLE, "Both"].forEach(w => { const b = document.createElement("button"); b.dataset.who = w; b.textContent = w; b.setAttribute("aria-pressed", "false"); $("whoSeg").appendChild(b); });
+// People: entries store who as "p1", "p2" or "Both"; display names come from settings.
+function cleanPeople(arr){
+  const a = Array.isArray(arr) ? arr : [];
+  return DEFAULT_PEOPLE.map((d, i) => String(a[i] == null ? "" : a[i]).trim().slice(0, NAME_MAX) || d);
+}
+const people = () => cleanPeople(settings.people);
+function normWho(w){
+  if (w === "p1" || w === "p2" || w === "Both") return w;
+  if (w === DEFAULT_PEOPLE[0]) return "p1";
+  if (w === DEFAULT_PEOPLE[1]) return "p2";
+  const s = String(w == null ? "" : w).trim().toLowerCase();
+  const i = s ? people().findIndex(n => n.toLowerCase() === s) : -1;
+  return i >= 0 ? IDS[i] : "Both";
+}
+function nameOf(id){
+  const p = people();
+  return id === "p1" ? p[0] : id === "p2" ? p[1] : p.join(" & ");
+}
+const normEntries = list => (Array.isArray(list) ? list : []).map(e => ({ ...e, who: normWho(e.who) }));
+[...IDS, "Both"].forEach(w => { const b = document.createElement("button"); b.dataset.who = w; b.setAttribute("aria-pressed", "false"); $("whoSeg").appendChild(b); });
 const whoBtns = document.querySelectorAll("[data-who]");
-if (![...PEOPLE, "Both"].includes(who)) who = "Both";
-function setWho(v){ who = v; lsSet("tp_who", v); whoBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.who === v)); render(); }
+function setWho(v){ who = normWho(v); lsSet("tp_who", who); render(); }
 whoBtns.forEach(b => b.onclick = () => setWho(b.dataset.who));
 
 function render(){
@@ -259,6 +373,12 @@ function render(){
   const mult = both() ? 2 : 1;
   $("lunchAmt").textContent = "+" + money(s.lunch * mult);
   $("dinnerAmt").textContent = "+" + money(s.dinner * mult);
+  const ppl = people();
+  whoBtns.forEach(b => {
+    const w = b.dataset.who, label = w === "Both" ? "Both" : nameOf(w);
+    b.textContent = label; b.title = nameOf(w);
+    b.setAttribute("aria-pressed", w === who);
+  });
 
   const total = entries.reduce((a, e) => a + (Number(e.amount) || 0), 0);
   $("total").textContent = money(total);
@@ -271,18 +391,17 @@ function render(){
     ? money(left) + " to go. That's about " + Math.ceil(left / (s.dinner * 2 || 1)) + " shared dinners at home."
     : "Goal reached. Go book it!";
 
-  const by = {}; PEOPLE.forEach(p => by[p] = 0);
+  const by = { p1: 0, p2: 0 };
   entries.forEach(e => {
     const a = Number(e.amount) || 0;
-    if (PEOPLE.includes(e.who)) by[e.who] += a;
-    else PEOPLE.forEach(p => by[p] += a / PEOPLE.length);
+    if (e.who in by) by[e.who] += a;
+    else IDS.forEach(id => by[id] += a / IDS.length);
   });
-  const names = Object.keys(by);
   $("stats").innerHTML = "";
-  names.forEach(n => {
+  IDS.forEach((id, i) => {
     const d = document.createElement("div"); d.className = "stat";
-    const sm = document.createElement("small"); sm.textContent = n;
-    const st = document.createElement("strong"); st.textContent = money(by[n]);
+    const sm = document.createElement("small"); sm.textContent = ppl[i];
+    const st = document.createElement("strong"); st.textContent = money(by[id]);
     d.append(sm, st); $("stats").appendChild(d);
   });
 
@@ -294,7 +413,7 @@ function render(){
     const li = document.createElement("li");
     const left = document.createElement("div");
     const t = document.createElement("div");
-    t.textContent = (e.who === "Both" ? BOTH_LABEL : (e.who || "Someone")) + " saved a " + e.meal + " out";
+    t.textContent = nameOf(e.who) + " saved a " + e.meal + " out";
     const m = document.createElement("div"); m.className = "meta";
     m.textContent = new Date(e.ts).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
     left.append(t, m);
@@ -369,7 +488,9 @@ $("tada").onclick = e => { if (e.target.id === "tada") $("tada").classList.remov
 function confetti(){
   const c = $("confetti"), ctx = c.getContext("2d"), dpr = window.devicePixelRatio || 1;
   const W = innerWidth, H = innerHeight; c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
-  const colors = ["#F2B632","#1F7A7A","#E85D75","#5BB5F0","#8BD17C","#FFFFFF"];
+  const cs = getComputedStyle(document.documentElement), v = n => cs.getPropertyValue(n).trim();
+  const coin = v("--coin") || "#F2B632", coinDeep = v("--coinDeep") || "#C98A06";
+  const colors = [coin, v("--sea"), v("--pop1"), v("--pop2"), v("--danger"), "#FFFFFF"].filter(Boolean);
   const bits = [];
   for (let burst = 0; burst < 3; burst++) {
     const ox = W * (0.2 + 0.3 * burst);
@@ -387,7 +508,7 @@ function confetti(){
       b.vy += .22; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
       if (b.y < H + 30) alive = true; else continue;
       ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r);
-      if (b.coin) { ctx.fillStyle = "#F2B632"; ctx.beginPath(); ctx.ellipse(0, 0, 8, 8 * Math.abs(Math.cos(b.r * 2)) + 1, 0, 0, 6.28); ctx.fill(); ctx.strokeStyle = "#C98A06"; ctx.lineWidth = 1.5; ctx.stroke(); }
+      if (b.coin) { ctx.fillStyle = coin; ctx.beginPath(); ctx.ellipse(0, 0, 8, 8 * Math.abs(Math.cos(b.r * 2)) + 1, 0, 0, 6.28); ctx.fill(); ctx.strokeStyle = coinDeep; ctx.lineWidth = 1.5; ctx.stroke(); }
       else { ctx.fillStyle = b.c; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h * Math.abs(Math.cos(b.r))); }
       ctx.restore();
     }
@@ -417,9 +538,187 @@ $("resetJar").onclick = async () => {
 function disarmReset(){ const b = $("resetJar"); b.classList.remove("arm"); b.textContent = "Empty the jar"; }
 $("settings").addEventListener("close", disarmReset);
 
+// CSV import and export. Rows use generic people ids (1, 2, both) so a file
+// moves cleanly between jars with different names.
+// CSV-PURE-START
+const CSV_MAX = 5000;
+function csvRows(text){
+  text = String(text).replace(/^﻿/, "");
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+      else f += c;
+    } else if (c === '"' && f.trim() === "") { q = true; f = ""; }
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(f); rows.push(row); row = []; f = "";
+    } else f += c;
+  }
+  if (f !== "" || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(v => v.trim() !== ""));
+}
+const csvCell = v => /[",\r\n]/.test(v = String(v)) ? '"' + v.replace(/"/g, '""') + '"' : v;
+const pad2 = n => String(n).padStart(2, "0");
+const isoDay = d => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+const csvDate = ts => { const d = new Date(ts); return isoDay(d) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
+function csvParseDate(s){
+  s = String(s).trim(); let m;
+  // Local time; a bare date lands at noon so it never slips a day.
+  const mk = (y, mo, d, h, mi) => {
+    const dt = new Date(+y, mo - 1, +d, h == null ? 12 : +h, mi == null ? 0 : +mi);
+    const ok = dt.getFullYear() === +y && dt.getMonth() === mo - 1 && dt.getDate() === +d && (h == null || +h < 24) && (mi == null || +mi < 60);
+    return ok ? dt.getTime() : NaN;
+  };
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/))) return mk(m[1], +m[2], m[3], m[4], m[5]);
+  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*([ap]m)?)?$/i))) {
+    let h = m[4]; if (h != null && m[6]) h = (+h % 12) + (/p/i.test(m[6]) ? 12 : 0);
+    return mk(m[3], +m[1], m[2], h, m[5]);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/i.test(s)) { const t = Date.parse(s); return isNaN(t) ? NaN : t; }
+  return NaN;
+}
+function csvParseWho(s, names){
+  const v = String(s).trim().toLowerCase().replace(/\s+/g, " ");
+  if (!v) return null;
+  const n = (names || []).map(x => String(x).trim().toLowerCase());
+  const one = t => {
+    t = t.trim();
+    const m = t.match(/^(?:p|person)?[ _#-]?([12])$/);
+    if (m) return "p" + m[1];
+    const i = t ? n.indexOf(t) : -1; return i >= 0 ? "p" + (i + 1) : null;
+  };
+  if (["both", "all", "together"].includes(v)) return "Both";
+  const single = one(v); if (single) return single;
+  const parts = v.split(/\s*(?:&|\+|\/|,|\band\b)\s*/).filter(Boolean);
+  if (parts.length === 2) { const a = one(parts[0]), b = one(parts[1]); if (a && b && a !== b) return "Both"; }
+  return null;
+}
+function csvParseAmount(s){
+  const v = String(s).trim().replace(/^usd\s*/i, "").replace(/[$\s,]/g, "");
+  return /^(\d+\.?\d*|\.\d+)$/.test(v) ? Number(v) : NaN;
+}
+const CSV_COLS = { date: ["date", "when", "time", "timestamp", "datetime", "day"], person: ["person", "who", "name"], meal: ["meal"], amount: ["amount", "value", "saved", "$", "usd"] };
+function parseImportCsv(text, names){
+  const rows = csvRows(text);
+  if (!rows.length) return { error: "The file is empty" };
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = {}, missing = [];
+  for (const k in CSV_COLS) { const i = head.findIndex(h => CSV_COLS[k].includes(h)); if (i < 0) missing.push(k); else col[k] = i; }
+  if (missing.length) return { error: "Missing column" + (missing.length > 1 ? "s" : "") + ": " + missing.join(", ") };
+  const entries = [], skipped = [];
+  rows.slice(1).forEach((r, i) => {
+    const row = i + 2, get = k => (r[col[k]] == null ? "" : r[col[k]]);
+    const ts = csvParseDate(get("date"));
+    const who = csvParseWho(get("person"), names);
+    const meal = get("meal").trim().toLowerCase();
+    const amount = csvParseAmount(get("amount"));
+    const why = isNaN(ts) ? "bad date" : !who ? "unknown person" : meal !== "lunch" && meal !== "dinner" ? "meal must be lunch or dinner" : !(amount > 0 && amount < 10000) ? "bad amount" : "";
+    if (why) skipped.push({ row, why });
+    else entries.push({ who, meal, people: who === "Both" ? 2 : 1, amount: Math.round(amount * 100) / 100, ts });
+  });
+  return { entries, skipped };
+}
+function entriesToCsv(list){
+  const lines = ["date,person,meal,amount"];
+  [...list].sort((a, b) => (a.ts || 0) - (b.ts || 0)).forEach(e => {
+    const p = e.who === "p1" ? "1" : e.who === "p2" ? "2" : "both";
+    lines.push([csvDate(e.ts), p, e.meal, Number(e.amount) || 0].map(csvCell).join(","));
+  });
+  return lines.join("\r\n") + "\r\n";
+}
+// CSV-PURE-END
+
+function csvDownload(name, text){
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+const csvSlug = () => String(settings.tripName || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "trip-piggybank";
+$("csvExport").onclick = () => {
+  if (!entries.length) { toast("No coins to export yet"); return; }
+  csvDownload(csvSlug() + "-" + isoDay(new Date()) + ".csv", entriesToCsv(entries));
+};
+$("csvTemplate").onclick = () => {
+  const now = new Date(), day = n => { const x = new Date(now); x.setDate(now.getDate() - n); return isoDay(x); };
+  const l = settings.lunch || 30, d = settings.dinner || 50;
+  const rows = ["date,person,meal,amount", day(2) + " 12:30,1,lunch," + l, day(1) + " 19:00,2,dinner," + d, day(0) + " 19:30,both,dinner," + d * 2];
+  csvDownload("piggybank-template.csv", rows.join("\r\n") + "\r\n");
+};
+
+let csvPending = null, csvArmTimer;
+function csvDisarm(){ const b = $("csvReplace"); b.classList.remove("arm"); b.textContent = "Replace jar"; }
+function csvReset(){
+  csvPending = null; clearTimeout(csvArmTimer); csvDisarm();
+  $("csvPrev").hidden = true; $("csvZone").hidden = false; $("csvZone").classList.remove("over");
+  $("csvFile").value = "";
+}
+function csvSync(){ $("csvImport").hidden = readOnly; if (readOnly) csvReset(); }
+async function csvLoad(file){
+  if (!file || readOnly) return;
+  if (!/\.csv$/i.test(file.name) && !/csv|text\/plain|excel/i.test(file.type)) { toast("Please choose a .csv file"); return; }
+  if (file.size > 2e6) { toast("That file is too big"); return; }
+  let res;
+  try { res = parseImportCsv(await file.text(), people()); } catch { toast("Couldn't read that file"); return; }
+  if (res.error) { toast(res.error); return; }
+  if (res.entries.length > CSV_MAX) { toast("Too many rows (max " + CSV_MAX + ")"); return; }
+  csvPending = res.entries;
+  const n = res.entries.length, sum = res.entries.reduce((a, e) => a + e.amount, 0), sk = res.skipped;
+  $("csvSum").textContent = n ? n + " coin" + (n === 1 ? "" : "s") + ", " + money(sum) + " total" : "No valid rows found";
+  $("csvSkip").textContent = sk.length ? sk.length + " row" + (sk.length === 1 ? "" : "s") + " skipped (" + sk.slice(0, 2).map(x => "row " + x.row + ": " + x.why).join("; ") + (sk.length > 2 ? "; ..." : "") + ")" : "";
+  $("csvSkip").hidden = !sk.length;
+  $("csvAdd").disabled = $("csvReplace").disabled = !n;
+  csvDisarm(); $("csvZone").hidden = true; $("csvPrev").hidden = false;
+  (n ? $("csvAdd") : $("csvCancel")).focus();
+}
+async function csvCommit(replace){
+  const list = csvPending; if (!list || !list.length) return;
+  $("csvAdd").disabled = $("csvReplace").disabled = true;
+  if (db) {
+    try { await db.importEntries(list, replace); }
+    catch (err) {
+      $("csvAdd").disabled = $("csvReplace").disabled = false; csvDisarm();
+      if (err && err.error && !err.code) toast("Import failed: " + err.error); else handleWriteError(err);
+      csvSync(); return;
+    }
+  } else {
+    const rid = () => self.crypto && crypto.randomUUID ? crypto.randomUUID() : "l" + Date.now().toString(36) + Math.random().toString(36).slice(2);
+    const add = list.map(e => ({ ...e, id: rid() }));
+    entries = replace ? add : entries.concat(add);
+    lsSet("tp_entries", entries); render();
+  }
+  toast("Imported " + list.length + " coin" + (list.length === 1 ? "" : "s"));
+  csvReset();
+}
+const csvZone = $("csvZone");
+csvZone.onclick = () => $("csvFile").click();
+csvZone.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("csvFile").click(); } };
+$("csvFile").onchange = e => csvLoad(e.target.files[0]);
+csvZone.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; csvZone.classList.add("over"); });
+csvZone.addEventListener("dragleave", e => { if (!csvZone.contains(e.relatedTarget)) csvZone.classList.remove("over"); });
+csvZone.addEventListener("drop", e => { e.preventDefault(); csvZone.classList.remove("over"); csvLoad(e.dataTransfer.files[0]); });
+// Keep a stray drop from navigating away while Settings is open.
+["dragover", "drop"].forEach(t => window.addEventListener(t, e => { if ($("settings").open) e.preventDefault(); }));
+$("csvAdd").onclick = () => csvCommit(false);
+$("csvReplace").onclick = () => {
+  const b = $("csvReplace");
+  if (!b.classList.contains("arm")) {
+    b.classList.add("arm"); b.textContent = "Tap again to replace " + entries.length + " coins";
+    clearTimeout(csvArmTimer); csvArmTimer = setTimeout(csvDisarm, 4000); return;
+  }
+  clearTimeout(csvArmTimer); csvCommit(true);
+};
+$("csvCancel").onclick = csvReset;
+$("openSettings").addEventListener("click", () => { csvReset(); csvSync(); });
+$("settings").addEventListener("close", csvReset);
+
 // Settings
 $("openSettings").onclick = () => {
   $("sName").value = settings.tripName; $("sGoal").value = settings.goal;
+  [$("sP1").value, $("sP2").value] = people();
   $("sLunch").value = settings.lunch; $("sDinner").value = settings.dinner;
   $("pinRow").hidden = !db;
   $("sPinOn").checked = !!settings.pinEnabled; $("sPin").value = "";
@@ -438,6 +737,7 @@ $("cancelSettings").onclick = () => $("settings").close();
 $("saveSettings").onclick = async () => {
   const next = {
     tripName: $("sName").value.trim() || DEFAULTS.tripName,
+    people: cleanPeople([$("sP1").value, $("sP2").value]),
     goal: Math.max(1, Number($("sGoal").value) || DEFAULTS.goal),
     lunch: Math.max(0, Number($("sLunch").value) || 0),
     dinner: Math.max(0, Number($("sDinner").value) || 0),
@@ -457,11 +757,77 @@ $("saveSettings").onclick = async () => {
   else { settings = next; lsSet("tp_settings", next); render(); toast("Saved"); }
 };
 
+// Scroll lock for overlays. Pinning the body with position:fixed is what stops
+// background scrolling on iOS Safari. A counter keeps overlapping overlays locked.
+let scrollLocks = 0, lockedY = 0;
+function lockScroll(){
+  if (scrollLocks++ > 0) return;
+  lockedY = window.scrollY;
+  document.documentElement.classList.add("scroll-locked");
+  Object.assign(document.body.style, { position: "fixed", top: -lockedY + "px", left: "0", right: "0", width: "100%" });
+}
+function unlockScroll(){
+  if (scrollLocks === 0 || --scrollLocks > 0) return;
+  document.documentElement.classList.remove("scroll-locked");
+  Object.assign(document.body.style, { position: "", top: "", left: "", right: "", width: "" });
+  window.scrollTo(0, lockedY);
+}
+// Watch each overlay so every open and close path (buttons, Escape, code) is covered
+const overlays = [[$("settings"), el => el.open], [$("pinGate"), el => el.classList.contains("on")], [$("tada"), el => el.classList.contains("on")]];
+const heldOverlays = new Set();
+function syncOverlayLocks(){
+  overlays.forEach(([el, isOpen]) => {
+    const on = isOpen(el);
+    if (on && !heldOverlays.has(el)) { heldOverlays.add(el); lockScroll(); }
+    else if (!on && heldOverlays.has(el)) { heldOverlays.delete(el); unlockScroll(); }
+  });
+}
+const overlayObserver = new MutationObserver(syncOverlayLocks);
+overlays.forEach(([el]) => overlayObserver.observe(el, { attributes: true, attributeFilter: ["open", "class"] }));
+syncOverlayLocks();
+
+// Theme skins, saved per device. Picking one previews it; Cancel reverts.
+const SKINS = [["lagoon", "Lagoon"], ["sunset", "Sunset"], ["forest", "Forest"], ["dusk", "Dusk"]];
+const skinIds = SKINS.map(s => s[0]);
+let skin = lsGet("tp_skin", "lagoon");
+if (!skinIds.includes(skin)) skin = "lagoon";
+let skinAtOpen = skin;
+const skinBtns = SKINS.map(([id, name]) => {
+  const b = document.createElement("button"); b.type = "button"; b.className = "skin"; b.dataset.id = id; b.setAttribute("role", "radio");
+  const sw = document.createElement("span"); sw.className = "sw"; sw.dataset.skin = id; sw.setAttribute("aria-hidden", "true");
+  const n = document.createElement("span"); n.textContent = name;
+  b.append(sw, n); b.onclick = () => applySkin(id);
+  $("skinPicker").appendChild(b); return b;
+});
+function syncThemeColor(){
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+  const m = document.querySelector('meta[name="theme-color"]'); if (m && bg) m.content = bg;
+}
+function applySkin(id){
+  skin = id;
+  if (id === "lagoon") document.documentElement.removeAttribute("data-skin");
+  else document.documentElement.setAttribute("data-skin", id);
+  skinBtns.forEach(b => { const on = b.dataset.id === id; b.setAttribute("aria-checked", on); b.tabIndex = on ? 0 : -1; });
+  syncThemeColor();
+}
+$("skinPicker").addEventListener("keydown", e => {
+  const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!d) return;
+  e.preventDefault();
+  const i = (skinIds.indexOf(skin) + d + skinIds.length) % skinIds.length;
+  applySkin(skinIds[i]); skinBtns[i].focus();
+});
+$("openSettings").addEventListener("click", () => { skinAtOpen = skin; });
+// Runs right after the Save handler: if it closed the dialog, the save went through
+$("saveSettings").addEventListener("click", () => { if (!$("settings").open) { skinAtOpen = skin; lsSet("tp_skin", skin); } });
+$("settings").addEventListener("close", () => { if (skin !== skinAtOpen) applySkin(skinAtOpen); });
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncThemeColor); } catch {}
+applySkin(skin);
+
 // Start in local mode, upgrade to shared storage when available
-setWho(who);
 settings = { ...DEFAULTS, ...lsGet("tp_settings", {}) };
-entries = lsGet("tp_entries", []);
-render();
+settings.people = people();
+entries = normEntries(lsGet("tp_entries", []));
+setWho(lsGet("tp_who", "Both"));
 
 (async () => {
   let shared = null;
@@ -470,10 +836,11 @@ render();
   db = shared; entries = []; settings = { ...DEFAULTS }; render();
   db.doc("config/settings").onSnapshot(s => {
     settings = s.exists ? { ...DEFAULTS, ...s.data() } : { ...DEFAULTS };
+    settings.people = people();
     gotSettings = true; ready = gotSettings && gotEntries; render();
   }, () => {});
   db.collection("entries").onSnapshot(snap => {
-    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    entries = normEntries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     gotEntries = true; ready = gotSettings && gotEntries; render();
   }, err => { if (err && err.code === "pin") showNote("PIN required. Refresh to try again."); else toast("Can't reach the jar. Will retry."); });
   db.start();

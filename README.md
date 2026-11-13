@@ -12,10 +12,11 @@ Built with plain HTML, a Netlify Function, and Netlify Blobs (Netlify's built-in
 </p>
 
 ## Features
-- One-tap logging: pick **J**, **R**, or **Both**, then tap lunch or dinner. "Both" logs double.
+- One-tap logging: pick a person (or **Both**), then tap lunch or dinner. "Both" logs double.
+- Custom names: set each person's name or initials (up to 6 characters) in Settings. Renaming keeps every past coin with the right person.
 - Jar fills toward the goal; per-person totals split "Both" entries evenly.
 - Recent coins shows the last 10, with "Show all" and a two-tap trash icon to delete.
-- Settings: trip name, goal, per-person lunch and dinner amounts, optional PIN, and "Empty the jar."
+- Settings: trip name, the two names, goal, per-person lunch and dinner amounts, optional PIN, and "Empty the jar."
 - Confetti celebration when the jar is full.
 - Syncs every 10 seconds and whenever the app is reopened.
 
@@ -81,15 +82,9 @@ The PIN is stored only as a salted hash on the server and is checked on every re
 
 ## Customize your copy
 
-Open `public/index.html` and edit the lines near the top of the script:
+The two people's names are set in the app: tap **Settings** and fill in **Person 1** and **Person 2** (up to 6 characters each; leave blank for the defaults "J" and "R"). They sync to both phones.
 
-```js
-const PEOPLE = ["J", "R"];   // your two names or initials (keep them short)
-```
-
-Commit the change on GitHub and Netlify redeploys automatically in under a minute.
-
-Other easy tweaks:
+Code tweaks (commit on GitHub and Netlify redeploys in under a minute):
 - **Default amounts and goal:** `DEFAULTS` in `public/index.html` (only used until you save Settings).
 - **App name on the home screen:** `name` and `short_name` in `public/manifest.json`, plus `apple-mobile-web-app-title` in `index.html`.
 - **Icon:** replace `public/icon-192.png`, `icon-512.png`, and `apple-touch-icon.png` (same sizes).

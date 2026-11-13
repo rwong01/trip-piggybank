@@ -19,20 +19,39 @@ async function authorized(req, data) {
   return pin && (await hashPin(pin, data.pinSalt)) === data.pinHash;
 }
 
+const IMPORT_MAX = 5000;
+
+// Shared by add and import: returns a clean entry with a fresh id, or throws.
+function cleanEntry(x, strictTs) {
+  x = x || {};
+  const amount = Number(x.amount);
+  if (!["p1", "p2", "Both"].includes(x.who)) throw new Error("bad who");
+  if (!["lunch", "dinner"].includes(x.meal)) throw new Error("bad meal");
+  if (!(amount > 0 && amount < 10000)) throw new Error("bad amount");
+  const ts = Number(x.ts);
+  if (strictTs && !(Number.isFinite(ts) && ts > 0)) throw new Error("bad ts");
+  return { id: crypto.randomUUID(), who: x.who, meal: x.meal, people: Number(x.people) || 1, amount, ts: ts || Date.now() };
+}
+
 async function apply(data, b) {
   if (b.op === "add") {
-    const x = b.entry || {};
-    const amount = Number(x.amount);
-    if (typeof x.who !== "string" || !x.who || x.who.length > 20) throw new Error("bad name");
-    if (!["lunch", "dinner"].includes(x.meal)) throw new Error("bad meal");
-    if (!(amount > 0 && amount < 10000)) throw new Error("bad amount");
-    data.entries.push({ id: crypto.randomUUID(), who: x.who, meal: x.meal, people: Number(x.people) || 1, amount, ts: Number(x.ts) || Date.now() });
+    data.entries.push(cleanEntry(b.entry, false));
+  } else if (b.op === "import") {
+    const list = b.entries;
+    if (!Array.isArray(list) || !list.length) throw new Error("nothing to import");
+    if (list.length > IMPORT_MAX) throw new Error("too many entries (max " + IMPORT_MAX + ")");
+    const clean = list.map((x, i) => {
+      try { return cleanEntry(x, true); } catch (e) { throw new Error(e.message + " in entry " + (i + 1)); }
+    });
+    data.entries = b.replace ? clean : data.entries.concat(clean);
   } else if (b.op === "delete") {
     data.entries = data.entries.filter(e => e.id !== b.id);
   } else if (b.op === "settings") {
     const s = b.settings || {};
+    const ppl = Array.isArray(s.people) ? s.people : [];
     data.settings = {
       tripName: String(s.tripName || "Trip Fund").slice(0, 40),
+      people: ["J", "R"].map((d, i) => String(ppl[i] ?? "").trim().slice(0, 6) || d),
       goal: Math.max(1, Number(s.goal) || 2500),
       lunch: Math.max(0, Number(s.lunch) || 0),
       dinner: Math.max(0, Number(s.dinner) || 0)
