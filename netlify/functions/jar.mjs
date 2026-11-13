@@ -23,7 +23,7 @@ async function apply(data, b) {
   if (b.op === "add") {
     const x = b.entry || {};
     const amount = Number(x.amount);
-    if (typeof x.who !== "string" || !x.who || x.who.length > 20) throw new Error("bad name");
+    if (!["p1", "p2", "Both"].includes(x.who)) throw new Error("bad who");
     if (!["lunch", "dinner"].includes(x.meal)) throw new Error("bad meal");
     if (!(amount > 0 && amount < 10000)) throw new Error("bad amount");
     data.entries.push({ id: crypto.randomUUID(), who: x.who, meal: x.meal, people: Number(x.people) || 1, amount, ts: Number(x.ts) || Date.now() });
@@ -31,8 +31,10 @@ async function apply(data, b) {
     data.entries = data.entries.filter(e => e.id !== b.id);
   } else if (b.op === "settings") {
     const s = b.settings || {};
+    const ppl = Array.isArray(s.people) ? s.people : [];
     data.settings = {
       tripName: String(s.tripName || "Trip Fund").slice(0, 40),
+      people: ["J", "R"].map((d, i) => String(ppl[i] ?? "").trim().slice(0, 8) || d),
       goal: Math.max(1, Number(s.goal) || 2500),
       lunch: Math.max(0, Number(s.lunch) || 0),
       dinner: Math.max(0, Number(s.dinner) || 0)

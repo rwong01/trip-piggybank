@@ -45,8 +45,8 @@ h1{font-size:1.35rem;font-weight:800;margin:0}
 input{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
 input:focus-visible,button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:3px;margin-bottom:10px}
-.seg.three{grid-template-columns:1fr 1fr 1fr}
-.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--soft);padding:9px;border-radius:9px;cursor:pointer}
+.seg.three{grid-template-columns:repeat(3,minmax(0,auto))}
+.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--soft);padding:9px 4px;border-radius:9px;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .drops{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:18px 10px;background:var(--coin);color:#3A2800;box-shadow:0 5px 0 var(--coinDeep);text-align:center;transition:transform .08s}
@@ -70,7 +70,7 @@ li .amt{font-weight:600;white-space:nowrap}
 .note{font-size:.82rem;color:var(--soft);background:var(--card);border:2px dashed var(--line);border-radius:10px;padding:8px 10px;margin:12px 0}
 dialog{border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,380px)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
-.row{margin-bottom:10px}.row label{display:block;font-size:.85rem;color:var(--soft);margin-bottom:3px}
+.row{margin-bottom:10px}.row.pair{display:flex;gap:10px}.row.pair>div{flex:1;min-width:0}.row label{display:block;font-size:.85rem;color:var(--soft);margin-bottom:3px}
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:var(--ink);color:var(--bg)}
 .toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 8px;font-weight:600}
@@ -141,6 +141,10 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 
 <dialog id="settings">
   <div class="row"><label for="sName">Trip name</label><input id="sName" maxlength="40"></div>
+  <div class="row pair">
+    <div><label for="sP1">Person 1</label><input id="sP1" maxlength="8" autocomplete="off"></div>
+    <div><label for="sP2">Person 2</label><input id="sP2" maxlength="8" autocomplete="off"></div>
+  </div>
   <div class="row"><label for="sGoal">Goal ($)</label><input id="sGoal" type="number" min="1" inputmode="decimal"></div>
   <div class="row"><label for="sLunch">Lunch, per person ($)</label><input id="sLunch" type="number" min="0" inputmode="decimal"></div>
   <div class="row"><label for="sDinner">Dinner, per person ($)</label><input id="sDinner" type="number" min="0" inputmode="decimal"></div>
@@ -178,8 +182,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== Customize these for your own copy =====
-const PEOPLE = ["J", "R"];          // two short names or initials
+// The two people's names are set in Settings (entries store ids "p1"/"p2").
 const API_URL = "/api/jar";         // Netlify Function endpoint (leave as is)
 
 let pinWaiter = null;
@@ -229,10 +232,13 @@ function makeDb(){
   };
 }
 
-const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false };
+const DEFAULT_PEOPLE = ["J", "R"];
+const NAME_MAX = 8;
+const IDS = ["p1", "p2"];
+const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false, people: DEFAULT_PEOPLE };
 let settings = { ...DEFAULTS };
 let entries = [];
-let who = lsGet("tp_who", "Both");
+let who = "Both";
 const both = () => who === "Both";
 let db = null, readOnly = false, showAll = false, ready = false, gotSettings = false, gotEntries = false;
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -245,11 +251,28 @@ function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch 
 
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800); }
 
-const BOTH_LABEL = PEOPLE.join(" & ");
-[...PEOPLE, "Both"].forEach(w => { const b = document.createElement("button"); b.dataset.who = w; b.textContent = w; b.setAttribute("aria-pressed", "false"); $("whoSeg").appendChild(b); });
+// People: entries store who as "p1", "p2" or "Both"; display names come from settings.
+function cleanPeople(arr){
+  const a = Array.isArray(arr) ? arr : [];
+  return DEFAULT_PEOPLE.map((d, i) => String(a[i] == null ? "" : a[i]).trim().slice(0, NAME_MAX) || d);
+}
+const people = () => cleanPeople(settings.people);
+function normWho(w){
+  if (w === "p1" || w === "p2" || w === "Both") return w;
+  if (w === DEFAULT_PEOPLE[0]) return "p1";
+  if (w === DEFAULT_PEOPLE[1]) return "p2";
+  const s = String(w == null ? "" : w).trim().toLowerCase();
+  const i = s ? people().findIndex(n => n.toLowerCase() === s) : -1;
+  return i >= 0 ? IDS[i] : "Both";
+}
+function nameOf(id){
+  const p = people();
+  return id === "p1" ? p[0] : id === "p2" ? p[1] : p.join(" & ");
+}
+const normEntries = list => (Array.isArray(list) ? list : []).map(e => ({ ...e, who: normWho(e.who) }));
+[...IDS, "Both"].forEach(w => { const b = document.createElement("button"); b.dataset.who = w; b.setAttribute("aria-pressed", "false"); $("whoSeg").appendChild(b); });
 const whoBtns = document.querySelectorAll("[data-who]");
-if (![...PEOPLE, "Both"].includes(who)) who = "Both";
-function setWho(v){ who = v; lsSet("tp_who", v); whoBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.who === v)); render(); }
+function setWho(v){ who = normWho(v); lsSet("tp_who", who); render(); }
 whoBtns.forEach(b => b.onclick = () => setWho(b.dataset.who));
 
 function render(){
@@ -259,6 +282,12 @@ function render(){
   const mult = both() ? 2 : 1;
   $("lunchAmt").textContent = "+" + money(s.lunch * mult);
   $("dinnerAmt").textContent = "+" + money(s.dinner * mult);
+  const ppl = people();
+  whoBtns.forEach(b => {
+    const w = b.dataset.who, label = w === "Both" ? "Both" : nameOf(w);
+    b.textContent = label; b.title = nameOf(w);
+    b.setAttribute("aria-pressed", w === who);
+  });
 
   const total = entries.reduce((a, e) => a + (Number(e.amount) || 0), 0);
   $("total").textContent = money(total);
@@ -271,18 +300,17 @@ function render(){
     ? money(left) + " to go. That's about " + Math.ceil(left / (s.dinner * 2 || 1)) + " shared dinners at home."
     : "Goal reached. Go book it!";
 
-  const by = {}; PEOPLE.forEach(p => by[p] = 0);
+  const by = { p1: 0, p2: 0 };
   entries.forEach(e => {
     const a = Number(e.amount) || 0;
-    if (PEOPLE.includes(e.who)) by[e.who] += a;
-    else PEOPLE.forEach(p => by[p] += a / PEOPLE.length);
+    if (e.who in by) by[e.who] += a;
+    else IDS.forEach(id => by[id] += a / IDS.length);
   });
-  const names = Object.keys(by);
   $("stats").innerHTML = "";
-  names.forEach(n => {
+  IDS.forEach((id, i) => {
     const d = document.createElement("div"); d.className = "stat";
-    const sm = document.createElement("small"); sm.textContent = n;
-    const st = document.createElement("strong"); st.textContent = money(by[n]);
+    const sm = document.createElement("small"); sm.textContent = ppl[i];
+    const st = document.createElement("strong"); st.textContent = money(by[id]);
     d.append(sm, st); $("stats").appendChild(d);
   });
 
@@ -294,7 +322,7 @@ function render(){
     const li = document.createElement("li");
     const left = document.createElement("div");
     const t = document.createElement("div");
-    t.textContent = (e.who === "Both" ? BOTH_LABEL : (e.who || "Someone")) + " saved a " + e.meal + " out";
+    t.textContent = nameOf(e.who) + " saved a " + e.meal + " out";
     const m = document.createElement("div"); m.className = "meta";
     m.textContent = new Date(e.ts).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
     left.append(t, m);
@@ -420,6 +448,7 @@ $("settings").addEventListener("close", disarmReset);
 // Settings
 $("openSettings").onclick = () => {
   $("sName").value = settings.tripName; $("sGoal").value = settings.goal;
+  [$("sP1").value, $("sP2").value] = people();
   $("sLunch").value = settings.lunch; $("sDinner").value = settings.dinner;
   $("pinRow").hidden = !db;
   $("sPinOn").checked = !!settings.pinEnabled; $("sPin").value = "";
@@ -438,6 +467,7 @@ $("cancelSettings").onclick = () => $("settings").close();
 $("saveSettings").onclick = async () => {
   const next = {
     tripName: $("sName").value.trim() || DEFAULTS.tripName,
+    people: cleanPeople([$("sP1").value, $("sP2").value]),
     goal: Math.max(1, Number($("sGoal").value) || DEFAULTS.goal),
     lunch: Math.max(0, Number($("sLunch").value) || 0),
     dinner: Math.max(0, Number($("sDinner").value) || 0),
@@ -458,10 +488,10 @@ $("saveSettings").onclick = async () => {
 };
 
 // Start in local mode, upgrade to shared storage when available
-setWho(who);
 settings = { ...DEFAULTS, ...lsGet("tp_settings", {}) };
-entries = lsGet("tp_entries", []);
-render();
+settings.people = people();
+entries = normEntries(lsGet("tp_entries", []));
+setWho(lsGet("tp_who", "Both"));
 
 (async () => {
   let shared = null;
@@ -470,10 +500,11 @@ render();
   db = shared; entries = []; settings = { ...DEFAULTS }; render();
   db.doc("config/settings").onSnapshot(s => {
     settings = s.exists ? { ...DEFAULTS, ...s.data() } : { ...DEFAULTS };
+    settings.people = people();
     gotSettings = true; ready = gotSettings && gotEntries; render();
   }, () => {});
   db.collection("entries").onSnapshot(snap => {
-    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    entries = normEntries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     gotEntries = true; ready = gotSettings && gotEntries; render();
   }, err => { if (err && err.code === "pin") showNote("PIN required. Refresh to try again."); else toast("Can't reach the jar. Will retry."); });
   db.start();
