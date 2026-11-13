@@ -84,6 +84,22 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .pinGate input{text-align:center;font-size:1.6rem;letter-spacing:.4em;margin-bottom:12px}
 .pinGate .err{color:var(--danger);font-size:.9rem;min-height:1.2em;margin-bottom:8px}
 .pinGate .btn{width:100%;padding:12px}
+.csv{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.csvTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.csvTop .gear{padding:6px 0}
+.csvZone{border:2px dashed var(--line);border-radius:12px;padding:12px 10px;text-align:center;color:var(--soft);font-size:.88rem;cursor:pointer;background:var(--card)}
+.csvZone b{display:block;color:var(--ink);font-weight:600}
+.csvZone small{display:block;margin-top:4px;font-size:.8rem}
+.csvZone:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.csvZone.over{border-color:var(--sea);color:var(--ink);background:var(--bg)}
+.csvPrev{border:2px solid var(--line);border-radius:12px;padding:10px;font-size:.88rem}
+.csvPrev p{margin:0 0 4px;font-weight:600}
+.csvPrev small{display:block;color:var(--soft);font-size:.8rem;overflow-wrap:anywhere}
+.csvPrev small[hidden]{display:none}
+.csvBtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.csvBtns .btn{padding:8px 11px}
+.btn.alt{background:none;color:var(--ink);border:2px solid var(--line)}
+.btn.alt.arm{background:var(--danger);border-color:var(--danger);color:#fff}
 .reset{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
 .reset small{display:block;color:var(--soft);font-size:.8rem;margin-top:6px}
 .btn.danger{background:none;color:var(--danger);border:2px solid var(--danger)}
@@ -150,6 +166,28 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
   <div class="row"><label for="sDinner">Dinner, per person ($)</label><input id="sDinner" type="number" min="0" inputmode="decimal"></div>
   <label class="toggle" id="pinRow"><span>Require a PIN</span><input type="checkbox" id="sPinOn"></label>
   <div class="row" id="pinField" hidden><label for="sPin" id="sPinLabel">PIN (4 to 8 digits)</label><input id="sPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"></div>
+  <div class="csv" id="csvBox">
+    <div class="csvTop">
+      <button class="btn alt" id="csvExport" type="button">Export CSV</button>
+      <button class="gear" id="csvTemplate" type="button">Download template</button>
+    </div>
+    <div id="csvImport">
+      <div class="csvZone" id="csvZone" role="button" tabindex="0" aria-describedby="csvFmt">
+        <b>Import CSV</b>Drop a file here or tap to choose
+        <small id="csvFmt">Columns: date, person (1, 2 or both), meal, amount</small>
+      </div>
+      <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+      <div class="csvPrev" id="csvPrev" hidden aria-live="polite">
+        <p id="csvSum"></p>
+        <small id="csvSkip"></small>
+        <div class="csvBtns">
+          <button class="btn" id="csvAdd" type="button">Add to jar</button>
+          <button class="btn alt" id="csvReplace" type="button">Replace jar</button>
+          <button class="btn ghost" id="csvCancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="reset">
     <button class="btn danger" id="resetJar">Empty the jar</button>
     <small id="resetHint">Deletes all coins. Amounts and goal stay.</small>
@@ -228,6 +266,7 @@ function makeDb(){
       onSnapshot: (cb, eb) => entL.push([cb, eb])
     }),
     doc: () => ({ set: settings => post({ op: "settings", settings }), onSnapshot: cb => setL.push(cb) }),
+    importEntries: (entries, replace) => post({ op: "import", entries, replace: !!replace }),
     start(){ pull(); setInterval(pull, 10000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); }); }
   };
 }
@@ -444,6 +483,183 @@ $("resetJar").onclick = async () => {
 };
 function disarmReset(){ const b = $("resetJar"); b.classList.remove("arm"); b.textContent = "Empty the jar"; }
 $("settings").addEventListener("close", disarmReset);
+
+// CSV import and export. Rows use generic people ids (1, 2, both) so a file
+// moves cleanly between jars with different names.
+// CSV-PURE-START
+const CSV_MAX = 5000;
+function csvRows(text){
+  text = String(text).replace(/^﻿/, "");
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+      else f += c;
+    } else if (c === '"' && f.trim() === "") { q = true; f = ""; }
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(f); rows.push(row); row = []; f = "";
+    } else f += c;
+  }
+  if (f !== "" || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(v => v.trim() !== ""));
+}
+const csvCell = v => /[",\r\n]/.test(v = String(v)) ? '"' + v.replace(/"/g, '""') + '"' : v;
+const pad2 = n => String(n).padStart(2, "0");
+const isoDay = d => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+const csvDate = ts => { const d = new Date(ts); return isoDay(d) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
+function csvParseDate(s){
+  s = String(s).trim(); let m;
+  // Local time; a bare date lands at noon so it never slips a day.
+  const mk = (y, mo, d, h, mi) => {
+    const dt = new Date(+y, mo - 1, +d, h == null ? 12 : +h, mi == null ? 0 : +mi);
+    const ok = dt.getFullYear() === +y && dt.getMonth() === mo - 1 && dt.getDate() === +d && (h == null || +h < 24) && (mi == null || +mi < 60);
+    return ok ? dt.getTime() : NaN;
+  };
+  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/))) return mk(m[1], +m[2], m[3], m[4], m[5]);
+  if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*([ap]m)?)?$/i))) {
+    let h = m[4]; if (h != null && m[6]) h = (+h % 12) + (/p/i.test(m[6]) ? 12 : 0);
+    return mk(m[3], +m[1], m[2], h, m[5]);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/i.test(s)) { const t = Date.parse(s); return isNaN(t) ? NaN : t; }
+  return NaN;
+}
+function csvParseWho(s, names){
+  const v = String(s).trim().toLowerCase().replace(/\s+/g, " ");
+  if (!v) return null;
+  const n = (names || []).map(x => String(x).trim().toLowerCase());
+  const one = t => {
+    t = t.trim();
+    const m = t.match(/^(?:p|person)?[ _#-]?([12])$/);
+    if (m) return "p" + m[1];
+    const i = t ? n.indexOf(t) : -1; return i >= 0 ? "p" + (i + 1) : null;
+  };
+  if (["both", "all", "together"].includes(v)) return "Both";
+  const single = one(v); if (single) return single;
+  const parts = v.split(/\s*(?:&|\+|\/|,|\band\b)\s*/).filter(Boolean);
+  if (parts.length === 2) { const a = one(parts[0]), b = one(parts[1]); if (a && b && a !== b) return "Both"; }
+  return null;
+}
+function csvParseAmount(s){
+  const v = String(s).trim().replace(/^usd\s*/i, "").replace(/[$\s,]/g, "");
+  return /^(\d+\.?\d*|\.\d+)$/.test(v) ? Number(v) : NaN;
+}
+const CSV_COLS = { date: ["date", "when", "time", "timestamp", "datetime", "day"], person: ["person", "who", "name"], meal: ["meal"], amount: ["amount", "value", "saved", "$", "usd"] };
+function parseImportCsv(text, names){
+  const rows = csvRows(text);
+  if (!rows.length) return { error: "The file is empty" };
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = {}, missing = [];
+  for (const k in CSV_COLS) { const i = head.findIndex(h => CSV_COLS[k].includes(h)); if (i < 0) missing.push(k); else col[k] = i; }
+  if (missing.length) return { error: "Missing column" + (missing.length > 1 ? "s" : "") + ": " + missing.join(", ") };
+  const entries = [], skipped = [];
+  rows.slice(1).forEach((r, i) => {
+    const row = i + 2, get = k => (r[col[k]] == null ? "" : r[col[k]]);
+    const ts = csvParseDate(get("date"));
+    const who = csvParseWho(get("person"), names);
+    const meal = get("meal").trim().toLowerCase();
+    const amount = csvParseAmount(get("amount"));
+    const why = isNaN(ts) ? "bad date" : !who ? "unknown person" : meal !== "lunch" && meal !== "dinner" ? "meal must be lunch or dinner" : !(amount > 0 && amount < 10000) ? "bad amount" : "";
+    if (why) skipped.push({ row, why });
+    else entries.push({ who, meal, people: who === "Both" ? 2 : 1, amount: Math.round(amount * 100) / 100, ts });
+  });
+  return { entries, skipped };
+}
+function entriesToCsv(list){
+  const lines = ["date,person,meal,amount"];
+  [...list].sort((a, b) => (a.ts || 0) - (b.ts || 0)).forEach(e => {
+    const p = e.who === "p1" ? "1" : e.who === "p2" ? "2" : "both";
+    lines.push([csvDate(e.ts), p, e.meal, Number(e.amount) || 0].map(csvCell).join(","));
+  });
+  return lines.join("\r\n") + "\r\n";
+}
+// CSV-PURE-END
+
+function csvDownload(name, text){
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+const csvSlug = () => String(settings.tripName || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "trip-piggybank";
+$("csvExport").onclick = () => {
+  if (!entries.length) { toast("No coins to export yet"); return; }
+  csvDownload(csvSlug() + "-" + isoDay(new Date()) + ".csv", entriesToCsv(entries));
+};
+$("csvTemplate").onclick = () => {
+  const now = new Date(), day = n => { const x = new Date(now); x.setDate(now.getDate() - n); return isoDay(x); };
+  const l = settings.lunch || 30, d = settings.dinner || 50;
+  const rows = ["date,person,meal,amount", day(2) + " 12:30,1,lunch," + l, day(1) + " 19:00,2,dinner," + d, day(0) + " 19:30,both,dinner," + d * 2];
+  csvDownload("piggybank-template.csv", rows.join("\r\n") + "\r\n");
+};
+
+let csvPending = null, csvArmTimer;
+function csvDisarm(){ const b = $("csvReplace"); b.classList.remove("arm"); b.textContent = "Replace jar"; }
+function csvReset(){
+  csvPending = null; clearTimeout(csvArmTimer); csvDisarm();
+  $("csvPrev").hidden = true; $("csvZone").hidden = false; $("csvZone").classList.remove("over");
+  $("csvFile").value = "";
+}
+function csvSync(){ $("csvImport").hidden = readOnly; if (readOnly) csvReset(); }
+async function csvLoad(file){
+  if (!file || readOnly) return;
+  if (!/\.csv$/i.test(file.name) && !/csv|text\/plain|excel/i.test(file.type)) { toast("Please choose a .csv file"); return; }
+  if (file.size > 2e6) { toast("That file is too big"); return; }
+  let res;
+  try { res = parseImportCsv(await file.text(), people()); } catch { toast("Couldn't read that file"); return; }
+  if (res.error) { toast(res.error); return; }
+  if (res.entries.length > CSV_MAX) { toast("Too many rows (max " + CSV_MAX + ")"); return; }
+  csvPending = res.entries;
+  const n = res.entries.length, sum = res.entries.reduce((a, e) => a + e.amount, 0), sk = res.skipped;
+  $("csvSum").textContent = n ? n + " coin" + (n === 1 ? "" : "s") + ", " + money(sum) + " total" : "No valid rows found";
+  $("csvSkip").textContent = sk.length ? sk.length + " row" + (sk.length === 1 ? "" : "s") + " skipped (" + sk.slice(0, 2).map(x => "row " + x.row + ": " + x.why).join("; ") + (sk.length > 2 ? "; ..." : "") + ")" : "";
+  $("csvSkip").hidden = !sk.length;
+  $("csvAdd").disabled = $("csvReplace").disabled = !n;
+  csvDisarm(); $("csvZone").hidden = true; $("csvPrev").hidden = false;
+  (n ? $("csvAdd") : $("csvCancel")).focus();
+}
+async function csvCommit(replace){
+  const list = csvPending; if (!list || !list.length) return;
+  $("csvAdd").disabled = $("csvReplace").disabled = true;
+  if (db) {
+    try { await db.importEntries(list, replace); }
+    catch (err) {
+      $("csvAdd").disabled = $("csvReplace").disabled = false; csvDisarm();
+      if (err && err.error && !err.code) toast("Import failed: " + err.error); else handleWriteError(err);
+      csvSync(); return;
+    }
+  } else {
+    const rid = () => self.crypto && crypto.randomUUID ? crypto.randomUUID() : "l" + Date.now().toString(36) + Math.random().toString(36).slice(2);
+    const add = list.map(e => ({ ...e, id: rid() }));
+    entries = replace ? add : entries.concat(add);
+    lsSet("tp_entries", entries); render();
+  }
+  toast("Imported " + list.length + " coin" + (list.length === 1 ? "" : "s"));
+  csvReset();
+}
+const csvZone = $("csvZone");
+csvZone.onclick = () => $("csvFile").click();
+csvZone.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("csvFile").click(); } };
+$("csvFile").onchange = e => csvLoad(e.target.files[0]);
+csvZone.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; csvZone.classList.add("over"); });
+csvZone.addEventListener("dragleave", e => { if (!csvZone.contains(e.relatedTarget)) csvZone.classList.remove("over"); });
+csvZone.addEventListener("drop", e => { e.preventDefault(); csvZone.classList.remove("over"); csvLoad(e.dataTransfer.files[0]); });
+// Keep a stray drop from navigating away while Settings is open.
+["dragover", "drop"].forEach(t => window.addEventListener(t, e => { if ($("settings").open) e.preventDefault(); }));
+$("csvAdd").onclick = () => csvCommit(false);
+$("csvReplace").onclick = () => {
+  const b = $("csvReplace");
+  if (!b.classList.contains("arm")) {
+    b.classList.add("arm"); b.textContent = "Tap again to replace " + entries.length + " coins";
+    clearTimeout(csvArmTimer); csvArmTimer = setTimeout(csvDisarm, 4000); return;
+  }
+  clearTimeout(csvArmTimer); csvCommit(true);
+};
+$("csvCancel").onclick = csvReset;
+$("openSettings").addEventListener("click", () => { csvReset(); csvSync(); });
+$("settings").addEventListener("close", csvReset);
 
 // Settings
 $("openSettings").onclick = () => {
