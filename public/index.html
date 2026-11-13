@@ -120,6 +120,7 @@ dialog[open]{display:flex;flex-direction:column}
 .dBody::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;border:3px solid var(--card)}
 .dBody::-webkit-scrollbar-thumb:hover{background:var(--soft)}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.trio>div{display:flex;flex-direction:column;justify-content:flex-end}
 .row .hint{display:block;color:var(--soft);font-size:.78rem;margin-top:4px}
 .sect{border-top:1px solid var(--line);margin-top:6px}
 .sect>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:12px 2px;font-weight:600;border-radius:8px}
@@ -235,10 +236,9 @@ html.scroll-locked{overflow:hidden;overscroll-behavior:none}
   <div class="row">
     <div class="trio">
       <div><label for="sGoal">Goal ($)</label><input id="sGoal" type="number" min="1" inputmode="decimal"></div>
-      <div><label for="sLunch">Lunch ($)</label><input id="sLunch" type="number" min="0" inputmode="decimal" aria-describedby="mealHint"></div>
-      <div><label for="sDinner">Dinner ($)</label><input id="sDinner" type="number" min="0" inputmode="decimal" aria-describedby="mealHint"></div>
+      <div><label for="sLunch">Lunch ($/person)</label><input id="sLunch" type="number" min="0" inputmode="decimal"></div>
+      <div><label for="sDinner">Dinner ($/person)</label><input id="sDinner" type="number" min="0" inputmode="decimal"></div>
     </div>
-    <small class="hint" id="mealHint">Lunch and dinner are per person.</small>
   </div>
   <div class="row"><label id="skinLabel">Theme</label><div class="skins" id="skinPicker" role="radiogroup" aria-labelledby="skinLabel"></div></div>
   <details class="sect" id="pinRow">
