@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip Piggybank</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Piggybank">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EAF3F1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF3F1; --ink:#12343B; --soft:#4F6F74; --card:#FFFFFF; --line:#C9DDD9;
+  --coin:#F2B632; --coinDeep:#C98A06; --sea:#1F7A7A; --danger:#B8483A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F2226; --ink:#E6F2EF; --soft:#9DB9B8; --card:#17313A; --line:#264950;
+  --coin:#F2B632; --coinDeep:#E0A020; --sea:#4FB3AE; --danger:#E0786A;}}
+:root[data-theme="dark"]{--bg:#0F2226;--ink:#E6F2EF;--soft:#9DB9B8;--card:#17313A;--line:#264950;--coin:#F2B632;--coinDeep:#E0A020;--sea:#4FB3AE;--danger:#E0786A;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,-apple-system,sans-serif;line-height:1.45}
+main{max-width:460px;margin:0 auto;padding:20px 18px 40px}
+h1,h2,.big{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+h1{font-size:1.35rem;font-weight:800;margin:0}
+.gear{background:none;border:0;color:var(--soft);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;padding:6px}
+.jar{position:relative;margin:22px auto 8px;width:210px;height:250px;border:4px solid var(--ink);border-radius:36px 36px 56px 56px;overflow:hidden;background:var(--card)}
+.jar::before{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:60px;height:10px;background:var(--bg);border:4px solid var(--ink);border-top:0;border-radius:0 0 8px 8px;z-index:2}
+.fill{position:absolute;left:0;right:0;bottom:0;height:0;background:repeating-radial-gradient(circle at 20% 30%,var(--coin) 0 9px,var(--coinDeep) 10px 11px,var(--coin) 12px 20px);transition:height .8s cubic-bezier(.2,.8,.2,1)}
+.jarText{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;text-align:center}
+.big{font-size:2.6rem;font-weight:800;line-height:1;background:var(--card);padding:4px 10px;border-radius:12px}
+.of{margin-top:6px;font-size:.9rem;color:var(--soft);background:var(--card);padding:2px 8px;border-radius:8px}
+.left{text-align:center;color:var(--soft);margin:6px 0 22px;font-size:.95rem}
+.who{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.who label{font-size:.85rem;color:var(--soft);white-space:nowrap}
+input{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+input:focus-visible,button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg.three{grid-template-columns:1fr 1fr 1fr}
+.seg button{font:inherit;font-weight:600;border:0;background:none;color:var(--soft);padding:9px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.drops{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:18px 10px;background:var(--coin);color:#3A2800;box-shadow:0 5px 0 var(--coinDeep);text-align:center;transition:transform .08s}
+.drop:active{transform:translateY(4px);box-shadow:0 1px 0 var(--coinDeep)}
+.drop b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.6rem;font-weight:800}
+.drop span{font-size:.88rem;font-weight:600}
+.drop:disabled{opacity:.5;cursor:not-allowed}
+h2{font-size:1.05rem;margin:28px 0 8px}
+.stats{display:flex;gap:10px;margin-top:4px}
+.stat{flex:1;background:var(--card);border-radius:12px;padding:10px 12px;border:2px solid var(--line)}
+.stat small{color:var(--soft);display:block;font-size:.8rem}
+.stat strong{font-size:1.1rem}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:.93rem}
+li .meta{color:var(--soft);font-size:.8rem}
+li .amt{font-weight:600;white-space:nowrap}
+.x{background:none;border:0;color:var(--soft);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:6px;margin-left:4px;border-radius:8px;display:inline-flex;align-items:center;min-width:32px;min-height:32px;justify-content:center}
+.x svg{width:18px;height:18px}
+.x.arm{color:#fff;background:var(--danger);padding:6px 10px}
+.empty{color:var(--soft);font-size:.9rem;padding:8px 0}
+.note{font-size:.82rem;color:var(--soft);background:var(--card);border:2px dashed var(--line);border-radius:10px;padding:8px 10px;margin:12px 0}
+dialog{border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:18px;width:min(92vw,380px)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.row{margin-bottom:10px}.row label{display:block;font-size:.85rem;color:var(--soft);margin-bottom:3px}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;cursor:pointer;background:var(--ink);color:var(--bg)}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 8px;font-weight:600}
+.toggle input{width:auto;transform:scale(1.4);accent-color:var(--sea)}
+.pinGate{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px}
+.pinGate.on{display:flex}
+.pinGate .card{width:100%;max-width:320px;text-align:center}
+.pinGate .lock{font-size:3rem;line-height:1}
+.pinGate h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1.6rem;margin:10px 0 4px}
+.pinGate p{color:var(--soft);margin:0 0 16px}
+.pinGate input{text-align:center;font-size:1.6rem;letter-spacing:.4em;margin-bottom:12px}
+.pinGate .err{color:var(--danger);font-size:.9rem;min-height:1.2em;margin-bottom:8px}
+.pinGate .btn{width:100%;padding:12px}
+.reset{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.reset small{display:block;color:var(--soft);font-size:.8rem;margin-top:6px}
+.btn.danger{background:none;color:var(--danger);border:2px solid var(--danger)}
+.btn.danger.arm{background:var(--danger);color:#fff}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:none;color:var(--soft)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+.tada{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(18,52,59,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+.tada.on{opacity:1;pointer-events:auto}
+.tada .card{background:var(--card);color:var(--ink);border-radius:24px;padding:28px 26px;text-align:center;max-width:320px;margin:0 20px;transform:scale(.6);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
+.tada.on .card{transform:scale(1)}
+.tada .emoji{font-size:3.4rem;line-height:1}
+.tada h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1.8rem;font-weight:800;margin:10px 0 6px}
+.tada p{margin:0 0 16px;color:var(--soft)}
+.jar.full{animation:wobble .9s ease 2}
+@keyframes wobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg) scale(1.05)}40%{transform:rotate(5deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(2deg)}}
+@media (prefers-reduced-motion:reduce){.jar.full{animation:none}.tada .card{transition:none}}
+
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="tripName">Trip Fund</h1>
+    <button class="gear" id="openSettings">Settings</button>
+  </header>
+
+  <div class="jar" id="jar" aria-live="polite">
+    <div class="fill" id="fill"></div>
+    <div class="jarText">
+      <div class="big" id="total">$0</div>
+      <div class="of" id="goalText">of $2,500</div>
+    </div>
+  </div>
+  <p class="left" id="leftText">Every meal at home drops a coin in.</p>
+
+  <div id="modeNote" class="note" hidden></div>
+
+  <div class="seg three" id="whoSeg" role="group" aria-label="Who saved"></div>
+
+  <div class="drops">
+    <button class="drop" id="addLunch"><b id="lunchAmt">+$30</b><span>Saved a lunch out</span></button>
+    <button class="drop" id="addDinner"><b id="dinnerAmt">+$50</b><span>Saved a dinner out</span></button>
+  </div>
+
+  <h2>By person</h2>
+  <div class="stats" id="stats"></div>
+
+  <h2>Recent coins</h2>
+  <ul id="log"></ul>
+</main>
+
+<dialog id="settings">
+  <div class="row"><label for="sName">Trip name</label><input id="sName" maxlength="40"></div>
+  <div class="row"><label for="sGoal">Goal ($)</label><input id="sGoal" type="number" min="1" inputmode="decimal"></div>
+  <div class="row"><label for="sLunch">Lunch, per person ($)</label><input id="sLunch" type="number" min="0" inputmode="decimal"></div>
+  <div class="row"><label for="sDinner">Dinner, per person ($)</label><input id="sDinner" type="number" min="0" inputmode="decimal"></div>
+  <label class="toggle" id="pinRow"><span>Require a PIN</span><input type="checkbox" id="sPinOn"></label>
+  <div class="row" id="pinField" hidden><label for="sPin" id="sPinLabel">PIN (4 to 8 digits)</label><input id="sPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"></div>
+  <div class="reset">
+    <button class="btn danger" id="resetJar">Empty the jar</button>
+    <small id="resetHint">Deletes all coins. Amounts and goal stay.</small>
+  </div>
+  <div class="actions">
+    <button class="btn ghost" id="cancelSettings">Cancel</button>
+    <button class="btn" id="saveSettings">Save</button>
+  </div>
+</dialog>
+
+<div class="pinGate" id="pinGate" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="card">
+    <div class="lock" aria-hidden="true">🔒🐷</div>
+    <h3 id="pinTitle">Enter PIN</h3>
+    <p>This jar is PIN protected.</p>
+    <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password" aria-label="PIN">
+    <div class="err" id="pinErr"></div>
+    <button class="btn" id="pinGo">Unlock</button>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+<div class="tada" id="tada" role="dialog" aria-modal="true" aria-labelledby="tadaTitle">
+  <div class="card">
+    <div class="emoji" aria-hidden="true">🎉🐷✈️</div>
+    <h3 id="tadaTitle">Jar's full!</h3>
+    <p id="tadaText">You hit your goal. Time to book the trip.</p>
+    <button class="btn" id="tadaClose">Let's go</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Customize these for your own copy =====
+const PEOPLE = ["J", "R"];          // two short names or initials
+const API_URL = "/api/jar";         // Netlify Function endpoint (leave as is)
+
+let pinWaiter = null;
+function askPin(wrong){
+  if (pinWaiter) return pinWaiter.p;
+  let res; const p = new Promise(r => res = r);
+  pinWaiter = { p, res };
+  $("pinErr").textContent = wrong ? "Wrong PIN. Try again." : "";
+  $("pinInput").value = ""; $("pinGate").classList.add("on"); setTimeout(() => $("pinInput").focus(), 50);
+  return p;
+}
+function submitPin(){
+  const v = $("pinInput").value.trim();
+  if (!/^\d{4,8}$/.test(v)) { $("pinErr").textContent = "PIN is 4 to 8 digits."; return; }
+  $("pinGate").classList.remove("on");
+  const w = pinWaiter; pinWaiter = null; w && w.res(v);
+}
+
+function makeDb(){
+  const setL = [], entL = [];
+  function emit(st){
+    const sSnap = { exists: !!st.settings, data: () => st.settings || {} };
+    const eSnap = { docs: (st.entries || []).map(e => ({ id: e.id, data: () => e })) };
+    setL.forEach(cb => cb(sSnap)); entL.forEach(([cb]) => cb(eSnap));
+  }
+  async function call(opts){
+    const headers = { "Content-Type": "application/json", "x-jar-pin": lsGet("tp_pin", "") };
+    const r = await fetch(API_URL + (opts ? "" : "?t=" + Date.now()), opts ? { ...opts, headers } : { headers, cache: "no-store" });
+    if (r.status === 401) {
+      const pin = await askPin(!!lsGet("tp_pin", ""));
+      lsSet("tp_pin", pin); return call(opts);
+    }
+    const j = await r.json();
+    if (!r.ok || j.error) throw j;
+    return j;
+  }
+  async function pull(){ try { emit(await call()); } catch (err) { entL.forEach(([, eb]) => eb && eb(err)); } }
+  const post = async body => emit(await call({ method: "POST", body: JSON.stringify(body) }));
+  return {
+    collection: () => ({
+      add: entry => post({ op: "add", entry }),
+      doc: id => ({ delete: () => post({ op: "delete", id }) }),
+      onSnapshot: (cb, eb) => entL.push([cb, eb])
+    }),
+    doc: () => ({ set: settings => post({ op: "settings", settings }), onSnapshot: cb => setL.push(cb) }),
+    start(){ pull(); setInterval(pull, 10000); document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); }); }
+  };
+}
+
+const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false };
+let settings = { ...DEFAULTS };
+let entries = [];
+let who = lsGet("tp_who", "Both");
+const both = () => who === "Both";
+let db = null, readOnly = false, showAll = false, ready = false, gotSettings = false, gotEntries = false;
+const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+const $ = id => document.getElementById(id);
+const money = n => "$" + Math.round(n).toLocaleString();
+
+function lsGet(k, d){ try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800); }
+
+const BOTH_LABEL = PEOPLE.join(" & ");
+[...PEOPLE, "Both"].forEach(w => { const b = document.createElement("button"); b.dataset.who = w; b.textContent = w; b.setAttribute("aria-pressed", "false"); $("whoSeg").appendChild(b); });
+const whoBtns = document.querySelectorAll("[data-who]");
+if (![...PEOPLE, "Both"].includes(who)) who = "Both";
+function setWho(v){ who = v; lsSet("tp_who", v); whoBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.who === v)); render(); }
+whoBtns.forEach(b => b.onclick = () => setWho(b.dataset.who));
+
+function render(){
+  const s = settings;
+  $("tripName").textContent = s.tripName || "Trip Fund";
+  document.title = s.tripName || "Trip Piggybank";
+  const mult = both() ? 2 : 1;
+  $("lunchAmt").textContent = "+" + money(s.lunch * mult);
+  $("dinnerAmt").textContent = "+" + money(s.dinner * mult);
+
+  const total = entries.reduce((a, e) => a + (Number(e.amount) || 0), 0);
+  $("total").textContent = money(total);
+  $("goalText").textContent = "of " + money(s.goal);
+  const pct = Math.min(100, s.goal > 0 ? total / s.goal * 100 : 0);
+  $("fill").style.height = pct + "%";
+  checkCelebrate(total, s.goal);
+  const left = s.goal - total;
+  $("leftText").textContent = left > 0
+    ? money(left) + " to go. That's about " + Math.ceil(left / (s.dinner * 2 || 1)) + " shared dinners at home."
+    : "Goal reached. Go book it!";
+
+  const by = {}; PEOPLE.forEach(p => by[p] = 0);
+  entries.forEach(e => {
+    const a = Number(e.amount) || 0;
+    if (PEOPLE.includes(e.who)) by[e.who] += a;
+    else PEOPLE.forEach(p => by[p] += a / PEOPLE.length);
+  });
+  const names = Object.keys(by);
+  $("stats").innerHTML = "";
+  names.forEach(n => {
+    const d = document.createElement("div"); d.className = "stat";
+    const sm = document.createElement("small"); sm.textContent = n;
+    const st = document.createElement("strong"); st.textContent = money(by[n]);
+    d.append(sm, st); $("stats").appendChild(d);
+  });
+
+  const log = $("log"); log.innerHTML = "";
+  const all = [...entries].sort((a,b) => (b.ts||0) - (a.ts||0));
+  const sorted = showAll ? all : all.slice(0, 10);
+  if (!sorted.length) { const li = document.createElement("li"); li.className = "empty"; li.textContent = "Tap a coin above each time you save a meal out."; log.appendChild(li); }
+  sorted.forEach(e => {
+    const li = document.createElement("li");
+    const left = document.createElement("div");
+    const t = document.createElement("div");
+    t.textContent = (e.who === "Both" ? BOTH_LABEL : (e.who || "Someone")) + " saved a " + e.meal + " out";
+    const m = document.createElement("div"); m.className = "meta";
+    m.textContent = new Date(e.ts).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+    left.append(t, m);
+    const right = document.createElement("div"); right.style.display = "flex"; right.style.alignItems = "center";
+    const a = document.createElement("span"); a.className = "amt"; a.textContent = "+" + money(e.amount);
+    right.appendChild(a);
+    if (!readOnly) {
+      const x = document.createElement("button"); x.className = "x"; x.setAttribute("aria-label", "Delete entry"); x.innerHTML = TRASH;
+      x.onclick = () => {
+        if (x.classList.contains("arm")) { removeEntry(e.id); return; }
+        x.classList.add("arm"); x.textContent = "Delete?";
+        setTimeout(() => { if (x.isConnected) { x.classList.remove("arm"); x.innerHTML = TRASH; } }, 3000);
+      };
+      right.appendChild(x);
+    }
+    li.append(left, right); log.appendChild(li);
+  });
+  if (all.length > 10) {
+    const li = document.createElement("li"); li.style.justifyContent = "center"; li.style.borderBottom = "0";
+    const b = document.createElement("button"); b.className = "gear";
+    b.textContent = showAll ? "Show less" : "Show all " + all.length;
+    b.onclick = () => { showAll = !showAll; render(); };
+    li.appendChild(b); log.appendChild(li);
+  }
+
+  $("addLunch").disabled = $("addDinner").disabled = readOnly;
+}
+
+async function addEntry(meal){
+  const people = both() ? 2 : 1;
+  const amount = (meal === "lunch" ? settings.lunch : settings.dinner) * people;
+  const entry = { who, meal, people, amount, ts: Date.now() };
+  if (db) {
+    try { await db.collection("entries").add(entry); toast("+" + money(amount) + " in the jar"); }
+    catch (err) { handleWriteError(err); }
+  } else {
+    entry.id = "l" + entry.ts; entries.push(entry); lsSet("tp_entries", entries); render(); toast("+" + money(amount) + " in the jar");
+  }
+}
+async function removeEntry(id){
+  if (db) { try { await db.collection("entries").doc(id).delete(); toast("Removed"); } catch (err) { handleWriteError(err); } }
+  else { entries = entries.filter(e => e.id !== id); lsSet("tp_entries", entries); render(); }
+}
+function handleWriteError(err){
+  const c = err && err.code;
+  if (c === "permission_denied" || c === "not_granted" || c === "not_writer") {
+    readOnly = true; showNote("You have view-only access, so you can see the jar but not add coins. Ask the owner for edit access."); render();
+  } else toast("Couldn't save. Try again.");
+}
+function showNote(t){ const n = $("modeNote"); n.textContent = t; n.hidden = false; }
+
+$("addLunch").onclick = () => addEntry("lunch");
+$("addDinner").onclick = () => addEntry("dinner");
+
+
+// Celebration
+function checkCelebrate(total, goal){
+  if (!ready || !(goal > 0)) return;
+  const key = "tp_celebrated_" + goal;
+  if (total >= goal) {
+    if (!lsGet(key, false)) { lsSet(key, true); setTimeout(celebrate, 900); }
+  } else if (lsGet(key, false)) lsSet(key, false);
+}
+function celebrate(){
+  $("tadaText").textContent = "You saved " + money(settings.goal) + " for " + (settings.tripName || "the trip") + ". Time to book it!";
+  const jar = $("jar"); jar.classList.remove("full"); void jar.offsetWidth; jar.classList.add("full");
+  $("tada").classList.add("on"); $("tadaClose").focus();
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) confetti();
+}
+$("tadaClose").onclick = () => $("tada").classList.remove("on");
+$("tada").onclick = e => { if (e.target.id === "tada") $("tada").classList.remove("on"); };
+function confetti(){
+  const c = $("confetti"), ctx = c.getContext("2d"), dpr = window.devicePixelRatio || 1;
+  const W = innerWidth, H = innerHeight; c.width = W * dpr; c.height = H * dpr; ctx.scale(dpr, dpr);
+  const colors = ["#F2B632","#1F7A7A","#E85D75","#5BB5F0","#8BD17C","#FFFFFF"];
+  const bits = [];
+  for (let burst = 0; burst < 3; burst++) {
+    const ox = W * (0.2 + 0.3 * burst);
+    for (let i = 0; i < 70; i++) {
+      const a = -Math.PI / 2 + (Math.random() - .5) * 1.6, v = 7 + Math.random() * 9;
+      bits.push({ x: ox, y: H * .75, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.28, vr: (Math.random() - .5) * .3,
+        w: 6 + Math.random() * 6, h: 8 + Math.random() * 10, c: colors[i % colors.length], coin: Math.random() < .2, delay: burst * 18 });
+    }
+  }
+  let f = 0;
+  (function tick(){
+    f++; ctx.clearRect(0, 0, W, H); let alive = false;
+    for (const b of bits) {
+      if (f < b.delay) { alive = true; continue; }
+      b.vy += .22; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+      if (b.y < H + 30) alive = true; else continue;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r);
+      if (b.coin) { ctx.fillStyle = "#F2B632"; ctx.beginPath(); ctx.ellipse(0, 0, 8, 8 * Math.abs(Math.cos(b.r * 2)) + 1, 0, 0, 6.28); ctx.fill(); ctx.strokeStyle = "#C98A06"; ctx.lineWidth = 1.5; ctx.stroke(); }
+      else { ctx.fillStyle = b.c; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h * Math.abs(Math.cos(b.r))); }
+      ctx.restore();
+    }
+    if (alive && f < 400) requestAnimationFrame(tick); else ctx.clearRect(0, 0, W, H);
+  })();
+}
+
+
+// Reset
+let resetTimer;
+$("resetJar").onclick = async () => {
+  const b = $("resetJar");
+  if (!b.classList.contains("arm")) {
+    b.classList.add("arm"); b.textContent = "Tap again to delete " + entries.length + " coins";
+    clearTimeout(resetTimer); resetTimer = setTimeout(disarmReset, 4000); return;
+  }
+  clearTimeout(resetTimer); b.disabled = true; b.textContent = "Emptying...";
+  const ids = entries.map(e => e.id);
+  if (db) {
+    let failed = 0;
+    for (const id of ids) { try { await db.collection("entries").doc(id).delete(); } catch (err) { failed++; if (err && ["permission_denied","not_granted","not_writer"].includes(err.code)) { handleWriteError(err); break; } } }
+    toast(failed ? "Some coins couldn't be removed. Try again." : "Jar emptied");
+  } else { entries = []; lsSet("tp_entries", entries); render(); toast("Jar emptied"); }
+  lsSet("tp_celebrated_" + settings.goal, false);
+  b.disabled = false; disarmReset(); $("settings").close();
+};
+function disarmReset(){ const b = $("resetJar"); b.classList.remove("arm"); b.textContent = "Empty the jar"; }
+$("settings").addEventListener("close", disarmReset);
+
+// Settings
+$("openSettings").onclick = () => {
+  $("sName").value = settings.tripName; $("sGoal").value = settings.goal;
+  $("sLunch").value = settings.lunch; $("sDinner").value = settings.dinner;
+  $("pinRow").hidden = !db;
+  $("sPinOn").checked = !!settings.pinEnabled; $("sPin").value = "";
+  syncPinField();
+  $("settings").showModal();
+};
+function syncPinField(){
+  const on = $("sPinOn").checked;
+  $("pinField").hidden = !on;
+  $("sPinLabel").textContent = settings.pinEnabled ? "New PIN (leave blank to keep current)" : "PIN (4 to 8 digits)";
+}
+$("sPinOn").onchange = syncPinField;
+$("pinGo").onclick = submitPin;
+$("pinInput").addEventListener("keydown", e => { if (e.key === "Enter") submitPin(); });
+$("cancelSettings").onclick = () => $("settings").close();
+$("saveSettings").onclick = async () => {
+  const next = {
+    tripName: $("sName").value.trim() || DEFAULTS.tripName,
+    goal: Math.max(1, Number($("sGoal").value) || DEFAULTS.goal),
+    lunch: Math.max(0, Number($("sLunch").value) || 0),
+    dinner: Math.max(0, Number($("sDinner").value) || 0),
+    pinEnabled: !!(db && $("sPinOn").checked)
+  };
+  const newPin = $("sPin").value.trim();
+  if (next.pinEnabled && (newPin || !settings.pinEnabled) && !/^\d{4,8}$/.test(newPin)) { $("sPin").focus(); toast("PIN must be 4 to 8 digits"); return; }
+  if (next.pinEnabled && newPin) next.newPin = newPin;
+  $("settings").close();
+  if (db) {
+    try {
+      await db.doc("config/settings").set(next);
+      if (next.newPin) lsSet("tp_pin", next.newPin);
+      toast(next.pinEnabled ? (next.newPin ? "Saved. Share the PIN with your partner." : "Saved") : "Saved");
+    } catch (err) { handleWriteError(err); }
+  }
+  else { settings = next; lsSet("tp_settings", next); render(); toast("Saved"); }
+};
+
+// Start in local mode, upgrade to shared storage when available
+setWho(who);
+settings = { ...DEFAULTS, ...lsGet("tp_settings", {}) };
+entries = lsGet("tp_entries", []);
+render();
+
+(async () => {
+  let shared = null;
+  if (location.protocol.startsWith("http")) shared = makeDb();
+  if (!shared) { ready = true; render(); showNote("Open this from your Netlify URL to sync. Coins are saved on this device only."); return; }
+  db = shared; entries = []; settings = { ...DEFAULTS }; render();
+  db.doc("config/settings").onSnapshot(s => {
+    settings = s.exists ? { ...DEFAULTS, ...s.data() } : { ...DEFAULTS };
+    gotSettings = true; ready = gotSettings && gotEntries; render();
+  }, () => {});
+  db.collection("entries").onSnapshot(snap => {
+    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    gotEntries = true; ready = gotSettings && gotEntries; render();
+  }, err => { if (err && err.code === "pin") showNote("PIN required. Refresh to try again."); else toast("Can't reach the jar. Will retry."); });
+  db.start();
+})();
+</script>
+</body>
+</html>
