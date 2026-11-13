@@ -209,8 +209,8 @@ html.scroll-locked{overflow:hidden;overscroll-behavior:none}
 <dialog id="settings">
   <div class="row"><label for="sName">Trip name</label><input id="sName" maxlength="40"></div>
   <div class="row pair">
-    <div><label for="sP1">Person 1</label><input id="sP1" maxlength="8" autocomplete="off"></div>
-    <div><label for="sP2">Person 2</label><input id="sP2" maxlength="8" autocomplete="off"></div>
+    <div><label for="sP1">Person 1</label><input id="sP1" maxlength="6" autocomplete="off"></div>
+    <div><label for="sP2">Person 2</label><input id="sP2" maxlength="6" autocomplete="off"></div>
   </div>
   <div class="row"><label for="sGoal">Goal ($)</label><input id="sGoal" type="number" min="1" inputmode="decimal"></div>
   <div class="row"><label for="sLunch">Lunch, per person ($)</label><input id="sLunch" type="number" min="0" inputmode="decimal"></div>
@@ -324,7 +324,7 @@ function makeDb(){
 }
 
 const DEFAULT_PEOPLE = ["J", "R"];
-const NAME_MAX = 8;
+const NAME_MAX = 6;
 const IDS = ["p1", "p2"];
 const DEFAULTS = { tripName: "Trip Fund", goal: 2500, lunch: 30, dinner: 50, pinEnabled: false, people: DEFAULT_PEOPLE };
 let settings = { ...DEFAULTS };

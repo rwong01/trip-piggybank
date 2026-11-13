@@ -13,7 +13,7 @@ Built with plain HTML, a Netlify Function, and Netlify Blobs (Netlify's built-in
 
 ## Features
 - One-tap logging: pick a person (or **Both**), then tap lunch or dinner. "Both" logs double.
-- Custom names: set each person's name or initials (up to 8 characters) in Settings. Renaming keeps every past coin with the right person.
+- Custom names: set each person's name or initials (up to 6 characters) in Settings. Renaming keeps every past coin with the right person.
 - Jar fills toward the goal; per-person totals split "Both" entries evenly.
 - Recent coins shows the last 10, with "Show all" and a two-tap trash icon to delete.
 - Settings: trip name, the two names, goal, per-person lunch and dinner amounts, optional PIN, and "Empty the jar."
@@ -82,7 +82,7 @@ The PIN is stored only as a salted hash on the server and is checked on every re
 
 ## Customize your copy
 
-The two people's names are set in the app: tap **Settings** and fill in **Person 1** and **Person 2** (up to 8 characters each; leave blank for the defaults "J" and "R"). They sync to both phones.
+The two people's names are set in the app: tap **Settings** and fill in **Person 1** and **Person 2** (up to 6 characters each; leave blank for the defaults "J" and "R"). They sync to both phones.
 
 Code tweaks (commit on GitHub and Netlify redeploys in under a minute):
 - **Default amounts and goal:** `DEFAULTS` in `public/index.html` (only used until you save Settings).

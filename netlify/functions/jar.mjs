@@ -51,7 +51,7 @@ async function apply(data, b) {
     const ppl = Array.isArray(s.people) ? s.people : [];
     data.settings = {
       tripName: String(s.tripName || "Trip Fund").slice(0, 40),
-      people: ["J", "R"].map((d, i) => String(ppl[i] ?? "").trim().slice(0, 8) || d),
+      people: ["J", "R"].map((d, i) => String(ppl[i] ?? "").trim().slice(0, 6) || d),
       goal: Math.max(1, Number(s.goal) || 2500),
       lunch: Math.max(0, Number(s.lunch) || 0),
       dinner: Math.max(0, Number(s.dinner) || 0)
